@@ -46,9 +46,11 @@ async function loadExchangeRate() {
 }
 
 async function loadCryptoData(cryptoId) {
+  // 🔧 USANDO PROXY CORS PARA EVITAR BLOQUEIO
   const priceUrl = `https://corsproxy.io/?${encodeURIComponent('https://api.coingecko.com/api/v3/simple/price?ids=' + cryptoId + '&vs_currencies=usd')}`;
   const chartUrl = `https://corsproxy.io/?${encodeURIComponent('https://api.coingecko.com/api/v3/coins/' + cryptoId + '/market_chart?vs_currency=usd&days=30&interval=daily')}`;
 
+  // Buscar preço atual
   try {
     const priceResponse = await fetch(priceUrl);
     const priceData = await priceResponse.json();
@@ -68,6 +70,7 @@ async function loadCryptoData(cryptoId) {
     document.getElementById("price-brl").textContent = "BRL: Erro";
   }
 
+  // Buscar dados do gráfico
   try {
     const chartResponse = await fetch(chartUrl);
     const chartData = await chartResponse.json();
