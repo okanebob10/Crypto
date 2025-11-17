@@ -46,14 +46,15 @@ async function loadExchangeRate() {
 }
 
 async function loadCryptoData(cryptoId) {
-  // 🔧 USANDO PROXY CORS PARA EVITAR BLOQUEIO
-  const priceUrl = `https://corsproxy.io/?${encodeURIComponent('https://api.coingecko.com/api/v3/simple/price?ids=' + cryptoId + '&vs_currencies=usd')}`;
-  const chartUrl = `https://corsproxy.io/?${encodeURIComponent('https://api.coingecko.com/api/v3/coins/' + cryptoId + '/market_chart?vs_currency=usd&days=30&interval=daily')}`;
+  // 🔧 USANDO UM PROXY ALTERNATIVO: allorigins.win
+  const priceUrl = `https://api.allorigins.win/get?url=${encodeURIComponent('https://api.coingecko.com/api/v3/simple/price?ids=' + cryptoId + '&vs_currencies=usd')}`;
+  const chartUrl = `https://api.allorigins.win/get?url=${encodeURIComponent('https://api.coingecko.com/api/v3/coins/' + cryptoId + '/market_chart?vs_currency=usd&days=30&interval=daily')}`;
 
   // Buscar preço atual
   try {
     const priceResponse = await fetch(priceUrl);
-    const priceData = await priceResponse.json();
+    const priceDataRaw = await priceResponse.json();
+    const priceData = JSON.parse(priceDataRaw.contents); // AllOrigins retorna string JSON dentro de 'contents'
     const priceUsd = priceData[cryptoId]?.usd;
 
     if (priceUsd !== undefined) {
@@ -73,7 +74,8 @@ async function loadCryptoData(cryptoId) {
   // Buscar dados do gráfico
   try {
     const chartResponse = await fetch(chartUrl);
-    const chartData = await chartResponse.json();
+    const chartDataRaw = await chartResponse.json();
+    const chartData = JSON.parse(chartDataRaw.contents); // AllOrigins retorna string JSON dentro de 'contents'
     renderChart(chartData.prices);
   } catch (err) {
     console.error("Erro ao buscar dados do gráfico:", err);
@@ -96,11 +98,11 @@ function renderChart(prices) {
 
   chart = new Chart(ctx, {
     type: "line",
-    data: {
+     {
       labels,
       datasets: [{
         label: "Preço (USD)",
-        data: values,
+         values,
         borderColor: "#6f42c1",
         backgroundColor: "rgba(111, 66, 193, 0.1)",
         borderWidth: 2,
